@@ -1,0 +1,114 @@
+version: '3'
+
+networks:
+  proxy:
+    external: true
+  internal:
+    external: false
+
+services:
+  proxy:
+    image: traefik
+    command: --web --docker --docker.domain=aim.loc --logLevel=DEBUG
+    networks:
+      - proxy
+    ports:
+      - "80:80"
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /dev/null:/traefik.toml
+    restart:
+      always
+
+  owncloud:
+#    image: nginx:latest
+    image: imkulikov/nginx-sticky
+    labels:
+      - traefik.backend=app
+      - traefik.docker.network=proxy
+      - traefik.port=80
+      - traefik.frontend.passHostHeader=true
+      - traefik.backend.loadbalancer.sticky=true
+    links:
+      - owncloud-app-1
+    volumes:
+      - ./data:/var/www/html:z
+      - ./nginx/default.conf:/etc/nginx/conf.d/03-default.conf
+    networks:
+      - internal
+      - proxy
+
+  owncloud-app-1:
+    image: owncloud:${VERSION}
+    labels:
+      - traefik.enable=false
+    links:
+      - db
+      - redis
+    environment:
+      - OWNCLOUD_DOMAIN=${DOMAIN}
+      - OWNCLOUD_DB_TYPE=mysql
+      - OWNCLOUD_DB_NAME=owncloud
+      - OWNCLOUD_DB_USERNAME=owncloud
+      - OWNCLOUD_DB_PASSWORD=owncloud
+      - OWNCLOUD_DB_HOST=db
+      - OWNCLOUD_ADMIN_USERNAME=${ADMIN_USERNAME}
+      - OWNCLOUD_ADMIN_PASSWORD=${ADMIN_PASSWORD}
+      - OWNCLOUD_REDIS_ENABLED=true
+      - OWNCLOUD_REDIS_HOST=redis
+    volumes:
+      - ./data:/var/www/html:z
+    networks:
+      - internal
+    restart: always
+
+  owncloud-app-2:
+    image: owncloud:${VERSION}
+    labels:
+      - traefik.enable=false
+    links:
+      - db
+      - redis
+    environment:
+      - OWNCLOUD_DOMAIN=${DOMAIN}
+      - OWNCLOUD_DB_TYPE=mysql
+      - OWNCLOUD_DB_NAME=owncloud
+      - OWNCLOUD_DB_USERNAME=owncloud
+      - OWNCLOUD_DB_PASSWORD=owncloud
+      - OWNCLOUD_DB_HOST=db
+      - OWNCLOUD_ADMIN_USERNAME=${ADMIN_USERNAME}
+      - OWNCLOUD_ADMIN_PASSWORD=${ADMIN_PASSWORD}
+      - OWNCLOUD_REDIS_ENABLED=true
+      - OWNCLOUD_REDIS_HOST=redis
+    volumes:
+      - ./data:/var/www/html:z
+    networks:
+      - internal
+    restart: always
+
+
+
+
+  db: 
+    image: webhippie/mariadb
+    labels:
+      - traefik.enable=false
+    environment:
+      - MARIADB_ROOT_PASSWORD=owncloud
+      - MARIADB_USERNAME=owncloud
+      - MARIADB_PASSWORD=owncloud
+      - MARIADB_DATABASE=owncloud
+    volumes:
+      - ./mysql:/var/lib/mysql:z
+    networks:
+      - internal
+
+  redis:
+    image: webhippie/redis
+    labels:
+      - traefik.enable=false
+    networks:
+      - internal
+
+
