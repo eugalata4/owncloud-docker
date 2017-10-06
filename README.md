@@ -1,8 +1,8 @@
 
 
-curl https://git.aimprosoft.com/admins/owncloud/blob/master/init.sh
-chmod +x init.sh
-./init.sh
+curl https://git.aimprosoft.com/admins/owncloud/blob/master/init.sh  
+chmod +x init.sh  
+./init.sh  
 
 service owncloud-docker stop  
 service owncloud-docker start  
