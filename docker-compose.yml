@@ -22,7 +22,6 @@ services:
       always
 
   owncloud:
-#    image: nginx:latest
     image: imkulikov/nginx-sticky
     labels:
       - traefik.backend=app
@@ -43,6 +42,17 @@ services:
     image: owncloud:${VERSION}
     labels:
       - traefik.enable=false
+    environment:
+      - OWNCLOUD_DOMAIN=${DOMAIN}
+      - OWNCLOUD_DB_TYPE=${DB_TYPE}
+      - OWNCLOUD_DB_NAME=${DB_NAME}
+      - OWNCLOUD_DB_USERNAME=${DB_USERNAME}
+      - OWNCLOUD_DB_PASSWORD=${DB_PASSWORD}
+      - OWNCLOUD_DB_HOST=${DB_HOST}
+      - OWNCLOUD_ADMIN_USERNAME=${ADMIN_USERNAME}
+      - OWNCLOUD_ADMIN_PASSWORD=${ADMIN_PASSWORD}
+      - OWNCLOUD_REDIS_ENABLED=${REDIS_ENABLED}
+      - OWNCLOUD_REDIS_HOST=${REDIS_HOST}
     links:
       - db
       - redis
@@ -56,6 +66,17 @@ services:
     image: owncloud:${VERSION}
     labels:
       - traefik.enable=false
+    environment:
+      - OWNCLOUD_DOMAIN=${DOMAIN}
+      - OWNCLOUD_DB_TYPE=${DB_TYPE}
+      - OWNCLOUD_DB_NAME=${DB_NAME}
+      - OWNCLOUD_DB_USERNAME=${DB_USERNAME}
+      - OWNCLOUD_DB_PASSWORD=${DB_PASSWORD}
+      - OWNCLOUD_DB_HOST=${DB_HOST}
+      - OWNCLOUD_ADMIN_USERNAME=${ADMIN_USERNAME}
+      - OWNCLOUD_ADMIN_PASSWORD=${ADMIN_PASSWORD}
+      - OWNCLOUD_REDIS_ENABLED=${REDIS_ENABLED}
+      - OWNCLOUD_REDIS_HOST=${REDIS_HOST}
     links:
       - db
       - redis
@@ -70,12 +91,12 @@ services:
     labels:
       - traefik.enable=false
     environment:
-      - MARIADB_ROOT_PASSWORD=owncloud
-      - MARIADB_USERNAME=owncloud
-      - MARIADB_PASSWORD=owncloud
-      - MARIADB_DATABASE=owncloud
+      - MARIADB_ROOT_PASSWORD=${DB_PASSWORD}
+      - MARIADB_USERNAME=${DB_USERNAME}
+      - MARIADB_PASSWORD=${DB_PASSWORD}
+      - MARIADB_DATABASE=${DB_PASSWORD}
     volumes:
-      - ./mysql:/var/lib/mysql:z
+      - /opt/data/mysql:/var/lib/mysql:z
     networks:
       - internal
 
