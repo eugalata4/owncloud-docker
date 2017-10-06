@@ -1,6 +1,6 @@
 #!/bin/bash
 
-BASEDIR=$(dirname "$0")
+BASEDIR=/opt/docker-compose/owncloud
 
 set -o allexport
 source $BASEDIR/.env
